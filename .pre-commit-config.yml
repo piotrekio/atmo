@@ -1,0 +1,30 @@
+fail_fast: true
+default_language_version:
+  python: python3.10
+minimum_pre_commit_version: '2.17'
+repos:
+- repo: git@git://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: check-byte-order-marker
+  - id: check-case-conflict
+  - id: check-docstring-first
+  - id: check-executables-have-shebangs
+  - id: check-shebang-scripts-are-executable
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: debug-statements
+  - id: detect-private-key
+  - id: end-of-file-fixer
+- repo: local
+  hooks:
+  - id: isort
+    name: isort
+    types: [python]
+    language: python
+    pass_filenames: true
+  - id: black
+    name: black
+    types: [python]
+    language: python
+    pass_filenames: true

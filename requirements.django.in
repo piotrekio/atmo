@@ -1,0 +1,7 @@
+django==4.0.3
+
+# Configuration
+python-decouple==3.6
+
+# Deployment
+gunicorn==20.1.0
