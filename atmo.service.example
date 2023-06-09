@@ -1,0 +1,10 @@
+[Unit]
+Description=Atmo, a home weather station for Raspberry Pi
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=<VIRTUALENV_PATH>/bin/python <REPOSITORY_PATH>/atmo.py
+
+[Install]
+WantedBy=multi-user.target

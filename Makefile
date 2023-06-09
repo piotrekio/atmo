@@ -1,8 +1,6 @@
 .PHONY:
 	install
 	requirements
-	test
-	itest
 
 install:
 	@echo Installing Python requirements...
@@ -14,9 +12,3 @@ requirements:
 	pip install -U pip setuptools pip-tools
 	pip-compile -q requirements.dev.in
 	pip-compile -q requirements.in
-
-test:
-	py.test
-
-itest:
-	py.test -s
