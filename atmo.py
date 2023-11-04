@@ -120,12 +120,16 @@ def send_metric(
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
-    # TODO: Capture error, skip sending a message in case of failure.
-    sock.sendto(
-        f"{prefix}.{metric_name}:{metric_value}|{metric_type}".encode(),
-        (GRAPHITE_HOST, GRAPHITE_PORT),
-    )
-    sock.close()
+    try:
+        sock.sendto(
+            f"{prefix}.{metric_name}:{metric_value}|{metric_type}".encode(),
+            (GRAPHITE_HOST, GRAPHITE_PORT),
+        )
+    except OSError:
+        # Raised when network is unreachable
+        pass
+    finally:
+        sock.close()
 
 
 def capture_sample(indoor_sensor: IndoorSensor, outdoor_sensor: OutdoorSensor):
