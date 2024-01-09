@@ -48,7 +48,9 @@ class Sample:
     pressure: Optional[float] = None
 
 
-def get_indoor_sensor(error_interval: float = SENSORS_SAMPLE_INTERVAL) -> IndoorSensor:
+def get_indoor_sensor(
+    error_interval: float = SENSORS_SAMPLE_INTERVAL,
+) -> Optional[IndoorSensor]:
     """
     Return an instance of the class representing the indoor sensor
 
@@ -61,14 +63,17 @@ def get_indoor_sensor(error_interval: float = SENSORS_SAMPLE_INTERVAL) -> Indoor
             logger.error(f"Sensor not found. Retrying in {error_interval} second(s)...")
             time.sleep(error_interval)
             continue
-    raise Exception("Sensor not found")
+    return None
 
 
-def get_outdoor_sensor() -> OutdoorSensor:
+def get_outdoor_sensor() -> Opitonal[OutdoorSensor]:
     """
     Return an instance of the class representing the outdoor sensor
     """
-    return W1ThermSensor()
+    try:
+        return W1ThermSensor()
+    except Exception:
+        return None
 
 
 def initalize_indoor_sensor(sensor: IndoorSensor, oversampling: int = OS_8X):
@@ -132,19 +137,22 @@ def send_metric(
         sock.close()
 
 
-def capture_sample(indoor_sensor: IndoorSensor, outdoor_sensor: OutdoorSensor):
+def capture_sample(
+    indoor_sensor: Optional[IndoorSensor], outdoor_sensor: Optional[OutdoorSensor]
+):
     """
     Get samples from both sensors and send them to Graphite
     """
-    indoor_sample = get_indoor_sample(indoor_sensor)
-    outdoor_sample = get_outdoor_sample(outdoor_sensor)
-    if indoor_sample:
-        send_metric(METRIC_HUMIDITY, indoor_sample.humidity)
-        send_metric(METRIC_PRESSURE, indoor_sample.pressure)
-        send_metric(METRIC_TEMPERATURE_INDOOR, indoor_sample.temperature)
-    else:
-        logger.error(f"Unable to read data from the indoor sensor")
-    send_metric(METRIC_TEMPERATURE_OUTDOOR, outdoor_sample.temperature)
+    if indoor_sensor:
+        if indoor_sample := get_indoor_sample(indoor_sensor):
+            send_metric(METRIC_HUMIDITY, indoor_sample.humidity)
+            send_metric(METRIC_PRESSURE, indoor_sample.pressure)
+            send_metric(METRIC_TEMPERATURE_INDOOR, indoor_sample.temperature)
+        else:
+            logger.error(f"Unable to read data from the indoor sensor")
+    if outdoor_sensor:
+        outdoor_sample = get_outdoor_sample(outdoor_sensor)
+        send_metric(METRIC_TEMPERATURE_OUTDOOR, outdoor_sample.temperature)
 
 
 @contextmanager
@@ -164,9 +172,12 @@ def main(interval: float = SENSORS_SAMPLE_INTERVAL):
     """
     Start the main loop of the program
     """
-    # TODO: Add more detailed logging around the startup phase.
     sensor_outdoor = get_outdoor_sensor()
     sensor_indoor = get_indoor_sensor()
+    if not (sensor_outdoor and sendor_indoor):
+        logger.error("Unable to acquire any sensor, exiting")
+        return
+    logger.info("Sensors acquired", outdoor=sensor_outdoor, indoor=sensor_indoor)
     initalize_indoor_sensor(sensor_indoor)
     while True:
         with ensure_duration(interval):
