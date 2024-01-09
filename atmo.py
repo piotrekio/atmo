@@ -66,7 +66,7 @@ def get_indoor_sensor(
     return None
 
 
-def get_outdoor_sensor() -> Opitonal[OutdoorSensor]:
+def get_outdoor_sensor() -> Optional[OutdoorSensor]:
     """
     Return an instance of the class representing the outdoor sensor
     """
