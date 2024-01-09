@@ -174,7 +174,7 @@ def main(interval: float = SENSORS_SAMPLE_INTERVAL):
     """
     sensor_outdoor = get_outdoor_sensor()
     sensor_indoor = get_indoor_sensor()
-    if not (sensor_outdoor and sendor_indoor):
+    if sensor_outdoor is None and sensor_indoor is None:
         logger.error("Unable to acquire any sensor, exiting")
         return
     logger.info("Sensors acquired", outdoor=sensor_outdoor, indoor=sensor_indoor)
